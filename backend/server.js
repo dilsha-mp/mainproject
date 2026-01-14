@@ -14,7 +14,13 @@ connectDB();
 
 const app = express();
 
-app.use(cors());
+
+const FRONTEND_URL = "https://mainproject-black.vercel.app"; // <- Replace with your Vercel URL
+app.use(cors({
+  origin: FRONTEND_URL,
+  credentials: true, 
+}));
+
 app.use(express.json());
 
 
@@ -23,11 +29,12 @@ app.use("/api/events", eventRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/payments", paymentRoutes);
 
+
 app.get("/", (req, res) => {
   res.send("Event Management API Running");
 });
 
-// Global error handler (last)
+
 app.use((err, req, res, next) => {
   console.error("GLOBAL ERROR:", err);
   res.status(err.status || 500).json({
