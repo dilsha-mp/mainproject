@@ -13,6 +13,16 @@ export default function EventCard({ event }) {
     }
   };
 
+  // ✅ Format date
+  const formattedDate = new Date(event.date).toLocaleDateString(
+    "en-IN",
+    {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    }
+  );
+
   return (
     <div
       className="group cursor-pointer rounded-lg overflow-hidden bg-white border hover:shadow-xl transition-all duration-300"
@@ -23,6 +33,10 @@ export default function EventCard({ event }) {
         <img
           src={event.image}
           alt={event.title}
+          onError={(e) => {
+            e.target.src =
+              "https://images.pexels.com/photos/799137/pexels-photo-799137.jpeg";
+          }}
           className="w-full h-full object-cover group-hover:scale-110 transition duration-500"
         />
 
@@ -42,11 +56,11 @@ export default function EventCard({ event }) {
         </p>
 
         <p className="text-xs text-gray-500">
-          {event.date}
+          {formattedDate}
         </p>
 
         <p className="text-sm font-semibold text-[#E31B23]">
-          ₹{event.price}
+          ₹{event.ticketPrice}
         </p>
       </div>
     </div>

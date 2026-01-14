@@ -1,15 +1,10 @@
-const express = require('express');
+import express from "express";
+import { createOrder, verifyPayment } from "../controllers/paymentController.js";
+import { protect } from "../middleware/authMiddleware.js";
+
 const router = express.Router();
 
-// 1. Import the functions - make sure the names match the controller
-const { createOrder, verifyPayment } = require('../controllers/paymentController');
+router.post("/create-order", protect, createOrder);
+router.post("/verify", protect, verifyPayment);
 
-// 2. Import the auth middleware
-const { auth } = require('../middlewares/auth');
-
-// 3. Register the routes
-// If createOrder or verifyPayment are undefined, this line crashes
-router.post('/create-order', auth, createOrder); 
-router.post('/verify', auth, verifyPayment);
-
-module.exports = router;
+export default router;

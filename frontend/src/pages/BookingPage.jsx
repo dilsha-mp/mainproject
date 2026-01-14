@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import api from "../api/axios";
 
 export default function BookingPage() {
-  const { eventId } = useParams();
+  const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useSelector((state) => state.auth);
 
@@ -13,23 +13,11 @@ export default function BookingPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!user) {
-      navigate("/login");
-      return;
-    }
+    if (!user) return navigate("/login");
+    api.get(`/events/${id}`).then((res) => setEvent(res.data));
+  }, [id, user, navigate]);
 
-    api.get(`/events/${eventId}`).then((res) => {
-      setEvent(res.data);
-    });
-  }, [eventId, user, navigate]);
-
-  if (!event) {
-    return (
-      <div className="h-[60vh] flex items-center justify-center">
-        Loading booking...
-      </div>
-    );
-  }
+  if (!event) return <div className="h-[60vh] flex items-center justify-center">Loading...</div>;
 
   const maxTickets = Math.min(event.availableTickets, 10);
   const totalAmount = tickets * event.ticketPrice;
@@ -42,13 +30,14 @@ export default function BookingPage() {
 
     try {
       setLoading(true);
+      const token = localStorage.getItem("token");
+      const res = await api.post(
+        "/bookings",
+        { eventId: event._id, tickets },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
-      const res = await api.post("/bookings", {
-        eventId: event._id,
-        tickets,
-      });
-
-      navigate(`/payment/${res.data.bookingId}`);
+      navigate(`/payment/${res.data.booking._id}`);
     } catch (err) {
       alert(err.response?.data?.message || "Booking failed");
     } finally {
@@ -58,19 +47,13 @@ export default function BookingPage() {
 
   return (
     <div className="max-w-[900px] mx-auto px-4 py-10">
-      <h1 className="text-2xl font-semibold mb-6">
-        Book Tickets
-      </h1>
-
+      <h1 className="text-2xl font-semibold mb-6">Book Tickets</h1>
       <div className="grid md:grid-cols-3 gap-6">
-        {/* EVENT INFO */}
         <div className="md:col-span-2 border rounded-lg p-5">
           <h2 className="text-xl font-semibold">{event.title}</h2>
           <p className="text-gray-500 mt-1">{event.location}</p>
-
           <div className="mt-6">
             <label className="font-medium">Select Tickets</label>
-
             <div className="flex items-center gap-4 mt-2">
               <button
                 disabled={tickets <= 1}
@@ -79,9 +62,7 @@ export default function BookingPage() {
               >
                 −
               </button>
-
               <span className="text-lg font-semibold">{tickets}</span>
-
               <button
                 disabled={tickets >= maxTickets}
                 onClick={() => setTickets((t) => t + 1)}
@@ -90,36 +71,25 @@ export default function BookingPage() {
                 +
               </button>
             </div>
-
-            <p className="text-sm text-gray-500 mt-2">
-              Available tickets: {event.availableTickets}
-            </p>
+            <p className="text-sm text-gray-500 mt-2">Available tickets: {event.availableTickets}</p>
           </div>
         </div>
 
-        {/* SUMMARY */}
         <div className="border rounded-lg p-5 h-fit">
-          <h3 className="text-lg font-semibold mb-3">
-            Order Summary
-          </h3>
-
+          <h3 className="text-lg font-semibold mb-3">Order Summary</h3>
           <p className="flex justify-between">
             <span>Tickets</span>
             <span>{tickets}</span>
           </p>
-
           <p className="flex justify-between mt-2">
             <span>Price</span>
             <span>₹{event.ticketPrice}</span>
           </p>
-
           <hr className="my-3" />
-
           <p className="flex justify-between font-semibold text-lg">
             <span>Total</span>
             <span>₹{totalAmount}</span>
           </p>
-
           <button
             onClick={handleBooking}
             disabled={loading}

@@ -59,7 +59,7 @@ function HeroSlider() {
                     : "right-5 md:right-14 text-right"
                     }`}
             >
-<h2 className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-bold leading-tight drop-shadow-lg">
+                <h2 className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-bold leading-tight drop-shadow-lg">
                     {currentSlide.title}
                 </h2>
 

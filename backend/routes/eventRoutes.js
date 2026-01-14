@@ -1,10 +1,14 @@
 import express from "express";
 import {
   createEvent,
-  approveEvent,
+  getMyEvents,
+  updateEvent,
   deleteEvent,
+  approveEvent,
+  rejectEvent,
   getApprovedEvents,
   getPendingEvents,
+  getSingleEvent,
 } from "../controllers/eventController.js";
 
 import { protect, authorizeRoles } from "../middleware/authMiddleware.js";
@@ -12,49 +16,25 @@ import upload from "../middleware/upload.js";
 
 const router = express.Router();
 
-// ORGANIZER → Create event
-router.post(
-  "/",
-  protect,
-  authorizeRoles("organizer"),
-  (req, res, next) => {
-    upload.single("image")(req, res, (err) => {
-      if (err) {
-        return res.status(400).json({
-          message: err.message,
-        });
-      }
-      next();
-    });
-  },
-  createEvent
-);
-
-// USER → Get approved events (with optional category)
+// PUBLIC
 router.get("/", getApprovedEvents);
 
-// ADMIN → View pending events
-router.get(
-  "/pending",
-  protect,
-  authorizeRoles("admin"),
-  getPendingEvents
-);
+// ORGANIZER
+router.get("/my-events", protect, authorizeRoles("organizer"), getMyEvents);
 
-// ADMIN → Approve event
-router.put(
-  "/approve/:id",
-  protect,
-  authorizeRoles("admin"),
-  approveEvent
-);
+// ADMIN
+router.get("/pending", protect, authorizeRoles("admin"), getPendingEvents);
+router.put("/approve/:id", protect, authorizeRoles("admin"), approveEvent);
+router.put("/reject/:id", protect, authorizeRoles("admin"), rejectEvent);
 
-// ADMIN → Reject event
-router.delete(
-  "/reject/:id",
-  protect,
-  authorizeRoles("admin"),
-  deleteEvent
-);
+// SINGLE EVENT (LAST!)
+router.get("/:id", getSingleEvent);
+
+// CRUD
+router.post("/", protect, authorizeRoles("organizer"), upload.single("image"), createEvent);
+router.put("/:id", protect, authorizeRoles("organizer"), upload.single("image"), updateEvent);
+router.delete("/:id", protect, authorizeRoles("organizer"), deleteEvent);
+
 
 export default router;
+

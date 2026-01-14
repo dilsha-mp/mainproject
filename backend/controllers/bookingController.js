@@ -5,34 +5,31 @@ import Event from "../models/Event.js";
 export const createBooking = async (req, res) => {
   const { eventId, tickets } = req.body;
 
-  try {
-    const event = await Event.findById(eventId);
+  const event = await Event.findOne({
+    _id: eventId,
+    isApproved: true,
+  });
+     if (!event) {
+    return res.status(404).json({ message: "Event not available" });
+  }
 
-    if (!event || !event.isApproved) {
-      return res.status(404).json({ message: "Event not available" });
-    }
-
-    if (event.availableTickets < tickets) {
-      return res.status(400).json({ message: "Not enough tickets" });
-    }
-
-    const totalAmount = tickets * event.ticketPrice;
+  if (event.availableTickets < tickets) {
+    return res.status(400).json({ message: "Not enough tickets" });
+  }
 
     const booking = await Booking.create({
       user: req.user._id,
       event: eventId,
       tickets,
-      totalAmount,
+      totalAmount: tickets * event.ticketPrice,
     });
 
-    res.status(201).json({
-      message: "Booking created. Proceed to payment",
-      booking,
-    });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
+
+  res.status(201).json({ booking }); 
 };
+
+
+   
 
 // USER → Confirm Payment (SIMULATED)
 export const confirmPayment = async (req, res) => {

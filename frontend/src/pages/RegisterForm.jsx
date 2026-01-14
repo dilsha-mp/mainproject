@@ -18,13 +18,19 @@ export default function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.post("/auth/register", form);
+      const payload = {
+        ...form,
+        role: form.role === "organizer" ? "organizer" : "user",
+      };
+
+      await api.post("/auth/register", payload);
       alert("Registration successful. Please login.");
       navigate("/login");
     } catch (err) {
       alert(err.response?.data?.message || "Registration failed");
     }
   };
+
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">

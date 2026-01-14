@@ -2,6 +2,14 @@ import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../redux/authSlice";
 import { useState } from "react";
+import {
+  Menu,
+  X,
+  Ticket,
+  LayoutDashboard,
+  LogOut,
+  LogIn,
+} from "lucide-react";
 
 export default function Navbar() {
   const { user } = useSelector((s) => s.auth);
@@ -10,43 +18,55 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b">
+    <header className="sticky top-0 z-50 bg-white border-b shadow-sm">
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-        
-        {/* LEFT – LOGO */}
+
+        {/* LOGO */}
         <Link
           to="/"
-          className="text-2xl font-bold tracking-tight text-[#E11C2A]"
+          className="text-2xl font-extrabold tracking-tight text-[#E31B23]"
         >
           EventEase
         </Link>
 
-        {/* CENTER – NAV LINKS */}
-        <nav className="hidden md:flex gap-8 font-medium text-gray-800">
-          <Link className="hover:text-[#E11C2A]" to="/">
+        {/* DESKTOP NAV */}
+        <nav className="hidden md:flex items-center gap-8 font-medium text-gray-800">
+          <Link to="/" className="hover:text-[#E31B23] transition">
             Home
           </Link>
 
-        
-            <Link className="hover:text-[#E11C2A]" to="/events">
-              Find Events
-            </Link>
-          
+          <Link to="/events" className="hover:text-[#E31B23] transition">
+            Find Events
+          </Link>
 
           {user?.role === "organizer" && (
-            <Link className="hover:text-[#E11C2A]" to="/organizer/create-event">
-              Create Events
+            <Link
+              to="/organizer/dashboard"
+              className="flex items-center gap-1 text-[#E31B23] font-semibold"
+            >
+              <LayoutDashboard size={18} />
+              Dashboard
+            </Link>
+          )}
+
+          {user?.role === "admin" && (
+            <Link
+              to="/admin/dashboard"
+              className="text-[#E31B23] font-semibold"
+            >
+              Admin Panel
             </Link>
           )}
         </nav>
 
-        {/* RIGHT – AUTH & BOOKINGS */}
+        {/* DESKTOP RIGHT */}
         <div className="hidden md:flex items-center gap-4">
           {user && (
             <Link
-              to="/bookings"
-              className="text-gray-700 hover:text-[#E11C2A]"
+              to="/my-bookings"
+              className="flex items-center gap-1 text-gray-700 hover:text-[#E31B23]"
             >
+              <Ticket size={18} />
               My Bookings
             </Link>
           )}
@@ -54,7 +74,7 @@ export default function Navbar() {
           {!user ? (
             <button
               onClick={() => navigate("/login")}
-              className="bg-[#E11C2A] text-white px-4 py-1.5 rounded-md hover:bg-red-700 transition"
+              className="bg-[#E31B23] text-white px-5 py-2 rounded-md font-semibold hover:bg-red-700 transition"
             >
               Login / Register
             </button>
@@ -64,65 +84,98 @@ export default function Navbar() {
                 dispatch(logout());
                 navigate("/");
               }}
-              className="border px-4 py-1.5 rounded-md hover:bg-gray-100"
+              className="flex items-center gap-1 border px-4 py-2 rounded-md hover:bg-gray-100 transition"
             >
+              <LogOut size={18} />
               Logout
             </button>
           )}
         </div>
 
-        {/* MOBILE MENU BUTTON */}
+        {/* MOBILE BUTTON */}
         <button
           onClick={() => setOpen(!open)}
-          className="md:hidden text-2xl"
+          className="md:hidden text-gray-800"
         >
-          ☰
+          {open ? <X size={26} /> : <Menu size={26} />}
         </button>
       </div>
 
       {/* MOBILE MENU */}
       {open && (
-        <div className="md:hidden bg-white border-t px-4 py-3 space-y-3">
-          <Link to="/" onClick={() => setOpen(false)}>Home</Link>
+        <div className="md:hidden bg-white border-t shadow-lg">
+          <div className="px-4 py-4 space-y-4 text-gray-800">
 
-          {user && (
-            <Link to="/events" onClick={() => setOpen(false)}>
-              Find Events
-            </Link>
-          )}
+            <MobileLink to="/" label="Home" setOpen={setOpen} />
+            <MobileLink to="/events" label="Find Events" setOpen={setOpen} />
 
-          {user?.role === "organizer" && (
-            <Link to="/create-event" onClick={() => setOpen(false)}>
-              Create Events
-            </Link>
-          )}
+            {user?.role === "organizer" && (
+              <MobileLink
+                to="/organizer/dashboard"
+                label="Organizer Dashboard"
+                setOpen={setOpen}
+              />
+            )}
 
-          {user && (
-            <Link to="/bookings" onClick={() => setOpen(false)}>
-              My Bookings
-            </Link>
-          )}
+            {user?.role === "admin" && (
+              <MobileLink
+                to="/admin/dashboard"
+                label="Admin Dashboard"
+                setOpen={setOpen}
+              />
+            )}
 
-          {!user ? (
-            <button
-              onClick={() => navigate("/login")}
-              className="w-full bg-[#E11C2A] text-white py-2 rounded-md"
-            >
-              Login / Register
-            </button>
-          ) : (
-            <button
-              onClick={() => {
-                dispatch(logout());
-                setOpen(false);
-              }}
-              className="w-full border py-2 rounded-md"
-            >
-              Logout
-            </button>
-          )}
+            {user && (
+              <MobileLink
+                to="/my-bookings"
+                label="My Bookings"
+                setOpen={setOpen}
+              />
+            )}
+
+            <div className="pt-3 border-t">
+              {!user ? (
+                <button
+                  onClick={() => {
+                    navigate("/login");
+                    setOpen(false);
+                  }}
+                  className="w-full flex items-center justify-center gap-2 bg-[#E31B23] text-white py-2.5 rounded-md font-semibold"
+                >
+                  <LogIn size={18} />
+                  Login / Register
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    dispatch(logout());
+                    setOpen(false);
+                    navigate("/");
+                  }}
+                  className="w-full flex items-center justify-center gap-2 border py-2.5 rounded-md"
+                >
+                  <LogOut size={18} />
+                  Logout
+                </button>
+              )}
+            </div>
+
+          </div>
         </div>
       )}
     </header>
+  );
+}
+
+/* MOBILE LINK COMPONENT */
+function MobileLink({ to, label, setOpen }) {
+  return (
+    <Link
+      to={to}
+      onClick={() => setOpen(false)}
+      className="block font-medium hover:text-[#E31B23]"
+    >
+      {label}
+    </Link>
   );
 }

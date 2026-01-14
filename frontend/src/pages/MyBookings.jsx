@@ -4,12 +4,11 @@ import api from "../api/axios";
 export default function MyBookings() {
   const [bookings, setBookings] = useState([]);
 
-  useEffect(() => {
-    api.get("/bookings/my").then((res) => {
-      setBookings(res.data);
-    });
-  }, []);
-
+useEffect(() => {
+  api.get("/bookings/my")
+    .then((res) => setBookings(res.data))
+    .catch(() => setBookings([]));
+}, []);
   return (
     <div className="max-w-[1100px] mx-auto px-4 py-8">
       <h1 className="text-2xl font-semibold mb-6">

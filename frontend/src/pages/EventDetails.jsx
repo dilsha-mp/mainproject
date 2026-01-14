@@ -12,7 +12,8 @@ export default function EventDetails() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get(`/events/${id}`)
+    api
+      .get(`/events/${id}`)
       .then((res) => {
         setEvent(res.data);
         setLoading(false);
@@ -20,6 +21,7 @@ export default function EventDetails() {
       .catch(() => setLoading(false));
   }, [id]);
 
+  /* ---------------- LOADING ---------------- */
   if (loading) {
     return (
       <div className="h-[60vh] flex items-center justify-center">
@@ -28,22 +30,26 @@ export default function EventDetails() {
     );
   }
 
-  if (!event || !event.isApproved) {
-    return (
+  /* ---------------- NOT FOUND / NOT APPROVED ---------------- */
+if (!event) {    return (
       <div className="h-[60vh] flex items-center justify-center">
-        <p className="text-red-500">
+        <p className="text-red-500 text-lg">
           This event is not available
         </p>
       </div>
     );
   }
 
-  const formattedDate = new Date(event.date).toLocaleDateString("en-IN", {
+  /* ---------------- DATE FORMAT ---------------- */
+  const formattedDate = new Date(event.date).toLocaleString("en-IN", {
     day: "numeric",
     month: "long",
     year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   });
 
+  /* ---------------- BOOKING HANDLER ---------------- */
   const handleBookNow = () => {
     if (!user) {
       navigate("/login");
@@ -55,15 +61,18 @@ export default function EventDetails() {
       return;
     }
 
-    navigate(`/booking/${event._id}`);
+    navigate(`/book/${event._id}`);
   };
 
   return (
     <>
-      {/* 🔥 BANNER */}
+      {/* ================= HERO BANNER ================= */}
       <div className="relative h-[320px] md:h-[420px]">
         <img
-          src={event.image || "/placeholder.jpg"}
+          src={
+            event.image ||
+            "https://via.placeholder.com/1200x500?text=Event+Image"
+          }
           alt={event.title}
           className="w-full h-full object-cover"
         />
@@ -82,18 +91,26 @@ export default function EventDetails() {
 
             <button
               onClick={handleBookNow}
-              className="mt-4 bg-[#E31B23] px-6 py-3 rounded-md font-semibold hover:bg-red-600 transition"
+              aria-disabled={event.availableTickets === 0}
+              disabled={event.availableTickets === 0}
+              className={`mt-4 px-6 py-3 rounded-md font-semibold transition ${
+                event.availableTickets === 0
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-[#E31B23] hover:bg-red-600"
+              }`}
             >
-              Book Tickets
+              {event.availableTickets === 0
+                ? "Sold Out"
+                : "Book Tickets"}
             </button>
           </div>
         </div>
       </div>
 
-      {/* 🔹 CONTENT */}
+      {/* ================= CONTENT ================= */}
       <div className="max-w-[1240px] mx-auto px-4 py-8 grid md:grid-cols-3 gap-8">
 
-        {/* LEFT */}
+        {/* -------- LEFT CONTENT -------- */}
         <div className="md:col-span-2 space-y-6">
           <section>
             <h2 className="text-xl font-semibold mb-2">
@@ -110,18 +127,24 @@ export default function EventDetails() {
             </h2>
 
             <ul className="space-y-2 text-gray-700">
-              <li><strong>Category:</strong> {event.category}</li>
-              <li><strong>Date:</strong> {formattedDate}</li>
-              <li><strong>Venue:</strong> {event.location}</li>
               <li>
-                <strong>Available Tickets:</strong>{" "}
+                <strong>Category:</strong> {event.category}
+              </li>
+              <li>
+                <strong>Date & Time:</strong> {formattedDate}
+              </li>
+              <li>
+                <strong>Venue:</strong> {event.location}
+              </li>
+              <li>
+                <strong>Tickets Available:</strong>{" "}
                 {event.availableTickets} / {event.totalTickets}
               </li>
             </ul>
           </section>
         </div>
 
-        {/* RIGHT */}
+        {/* -------- RIGHT TICKET CARD -------- */}
         <div className="border rounded-lg p-5 h-fit shadow-sm">
           <h3 className="text-lg font-semibold mb-3">
             Ticket Price
@@ -133,6 +156,7 @@ export default function EventDetails() {
 
           <button
             onClick={handleBookNow}
+            aria-disabled={event.availableTickets === 0}
             disabled={event.availableTickets === 0}
             className={`w-full mt-4 py-3 rounded-md font-semibold transition ${
               event.availableTickets === 0

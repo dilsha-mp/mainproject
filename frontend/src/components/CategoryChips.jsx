@@ -5,6 +5,7 @@ const categories = [
   { name: "Music", icon: "🎵" },
   { name: "Workshops", icon: "🧠" },
   { name: "Comedy", icon: "😂" },
+  { name: "Activities", icon: "🎯" }
 ];
 
 export default function CategoryChips({ active, setActive }) {

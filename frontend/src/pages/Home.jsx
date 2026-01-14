@@ -7,14 +7,15 @@ import api from "../api/axios";
 export default function Home() {
   const [events, setEvents] = useState([]);
   const [activeCategory, setActiveCategory] = useState("All");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get("/events").then((res) => {
-      setEvents(res.data);
-    });
+    api.get("/events")
+      .then((res) => setEvents(res.data))
+      .catch((err) => console.error(err))
+      .finally(() => setLoading(false));
   }, []);
 
-  // 🔥 FILTER LOGIC
   const filteredEvents =
     activeCategory === "All"
       ? events
@@ -31,7 +32,6 @@ export default function Home() {
         setActive={setActiveCategory}
       />
 
-      {/* EVENTS SECTION */}
       <div className="max-w-[1240px] mx-auto px-4 mt-8">
         <h2 className="text-xl font-semibold mb-4">
           {activeCategory === "All"
@@ -39,10 +39,10 @@ export default function Home() {
             : `${activeCategory} Events`}
         </h2>
 
-        {filteredEvents.length === 0 ? (
-          <p className="text-gray-500">
-            No events available.
-          </p>
+        {loading ? (
+          <p className="text-gray-500">Loading events...</p>
+        ) : filteredEvents.length === 0 ? (
+          <p className="text-gray-500">No events available.</p>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
             {filteredEvents.map((event) => (

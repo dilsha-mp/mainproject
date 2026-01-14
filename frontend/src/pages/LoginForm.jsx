@@ -12,32 +12,44 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      setLoading(true);
+ const handleSubmit = async (e) => {
+  e.preventDefault();
 
-      const res = await api.post("/auth/login", {
-        email,
-        password,
-      });
+  try {
+    setLoading(true);
 
-      dispatch(loginSuccess(res.data));
+    const res = await api.post("/auth/login", {
+      email,
+      password,
+    });
 
-      // Role-based redirect
-      if (res.data.role === "admin") {
+    // Save auth to redux
+    dispatch(loginSuccess(res.data));
+
+    const role = res.data.user?.role;
+
+    // Role-based redirect
+    switch (role) {
+      case "admin":
         navigate("/admin/dashboard");
-      } else if (res.data.role === "organizer") {
+        break;
+
+      case "organizer":
         navigate("/organizer/dashboard");
-      } else {
+        break;
+
+      case "user":
+      default:
         navigate("/");
-      }
-    } catch (err) {
-      alert(err.response?.data?.message || "Login failed");
-    } finally {
-      setLoading(false);
+        break;
     }
-  };
+  } catch (err) {
+    alert(err.response?.data?.message || "Login failed");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
