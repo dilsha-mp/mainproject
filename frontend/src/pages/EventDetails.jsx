@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import api from "../api/axios";
+import { Crown } from "lucide-react";
 
 export default function EventDetails() {
   const { id } = useParams();
@@ -11,6 +12,14 @@ export default function EventDetails() {
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const [tickets, setTickets] = useState(1);
+  const [isVip, setIsVip] = useState(false);
+
+  const [promoCode, setPromoCode] = useState("");
+  const [promoApplied, setPromoApplied] = useState(false);
+  const [promoMessage, setPromoMessage] = useState("");
+
+  /* ================= FETCH EVENT ================= */
   useEffect(() => {
     api
       .get(`/events/${id}`)
@@ -21,7 +30,6 @@ export default function EventDetails() {
       .catch(() => setLoading(false));
   }, [id]);
 
-  /* ---------------- LOADING ---------------- */
   if (loading) {
     return (
       <div className="h-[60vh] flex items-center justify-center">
@@ -30,17 +38,14 @@ export default function EventDetails() {
     );
   }
 
-  /* ---------------- NOT FOUND / NOT APPROVED ---------------- */
-if (!event) {    return (
+  if (!event) {
+    return (
       <div className="h-[60vh] flex items-center justify-center">
-        <p className="text-red-500 text-lg">
-          This event is not available
-        </p>
+        <p className="text-red-500 text-lg">Event not found</p>
       </div>
     );
   }
 
-  /* ---------------- DATE FORMAT ---------------- */
   const formattedDate = new Date(event.date).toLocaleString("en-IN", {
     day: "numeric",
     month: "long",
@@ -49,132 +54,136 @@ if (!event) {    return (
     minute: "2-digit",
   });
 
-  /* ---------------- BOOKING HANDLER ---------------- */
+  const applyPromoCode = () => {
+    if (promoCode.trim().toUpperCase() === "SAVE10") {
+      setPromoApplied(true);
+      setPromoMessage("🎉 Promo applied! 10% discount");
+    } else {
+      setPromoApplied(false);
+      setPromoMessage("❌ Invalid promo code");
+    }
+  };
+
+  const basePrice = event.ticketPrice * tickets;
+  const vipFee = isVip ? 500 * tickets : 0;
+  const discount = promoApplied ? basePrice * 0.1 : 0;
+  const finalPrice = Math.round(basePrice + vipFee - discount);
+
   const handleBookNow = () => {
-    if (!user) {
-      navigate("/login");
-      return;
-    }
+    if (!user) return navigate("/login");
+    if (event.availableTickets < tickets)
+      return alert("Not enough tickets available");
 
-    if (event.availableTickets === 0) {
-      alert("Tickets sold out");
-      return;
-    }
-
-    navigate(`/book/${event._id}`);
+    navigate(`/book/${event._id}`, {
+      state: { tickets, isVip, finalPrice },
+    });
   };
 
   return (
     <>
-      {/* ================= HERO BANNER ================= */}
-      <div className="relative h-[320px] md:h-[420px]">
-        <img
-          src={
-            event.image ||
-            "https://via.placeholder.com/1200x500?text=Event+Image"
-          }
-          alt={event.title}
-          className="w-full h-full object-cover"
-        />
-
-        <div className="absolute inset-0 bg-black/70" />
-
-        <div className="absolute inset-0 flex items-end">
-          <div className="max-w-[1240px] mx-auto px-4 pb-8 text-white w-full">
-            <h1 className="text-2xl md:text-4xl font-bold">
-              {event.title}
-            </h1>
-
-            <p className="mt-2 text-sm md:text-base">
+      {/* IMAGE HERO */}
+      <div className="max-w-[1240px] mx-auto px-4 pt-8">
+        <div className="relative rounded-3xl overflow-hidden shadow-xl aspect-video lg:aspect-[21/9] bg-gray-200 group">
+          <img
+            src={event.image || "https://via.placeholder.com/1600x900"}
+            alt={event.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+          <div className="absolute bottom-6 left-6 right-6 text-white">
+            <h1 className="text-2xl md:text-4xl font-bold">{event.title}</h1>
+            <p className="mt-2 text-gray-200">
               {formattedDate} • {event.location}
             </p>
-
-            <button
-              onClick={handleBookNow}
-              aria-disabled={event.availableTickets === 0}
-              disabled={event.availableTickets === 0}
-              className={`mt-4 px-6 py-3 rounded-md font-semibold transition ${
-                event.availableTickets === 0
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-[#E31B23] hover:bg-red-600"
-              }`}
-            >
-              {event.availableTickets === 0
-                ? "Sold Out"
-                : "Book Tickets"}
-            </button>
           </div>
         </div>
       </div>
 
-      {/* ================= CONTENT ================= */}
-      <div className="max-w-[1240px] mx-auto px-4 py-8 grid md:grid-cols-3 gap-8">
-
-        {/* -------- LEFT CONTENT -------- */}
-        <div className="md:col-span-2 space-y-6">
+      {/* CONTENT GRID */}
+      <div className="max-w-[1240px] mx-auto px-4 py-10 grid md:grid-cols-3 gap-8">
+        
+        {/* LEFT */}
+        <div className="md:col-span-2 space-y-8">
           <section>
-            <h2 className="text-xl font-semibold mb-2">
-              About the Event
-            </h2>
-            <p className="text-gray-600 leading-relaxed">
-              {event.description}
-            </p>
+            <h2 className="text-xl font-semibold mb-2">About the Event</h2>
+            <p className="text-gray-600">{event.description}</p>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-2">
-              Event Details
-            </h2>
-
+            <h2 className="text-xl font-semibold mb-2">Event Details</h2>
             <ul className="space-y-2 text-gray-700">
-              <li>
-                <strong>Category:</strong> {event.category}
-              </li>
-              <li>
-                <strong>Date & Time:</strong> {formattedDate}
-              </li>
-              <li>
-                <strong>Venue:</strong> {event.location}
-              </li>
-              <li>
-                <strong>Tickets Available:</strong>{" "}
-                {event.availableTickets} / {event.totalTickets}
-              </li>
+              <li><strong>Category:</strong> {event.category}</li>
+              <li><strong>Date:</strong> {formattedDate}</li>
+              <li><strong>Venue:</strong> {event.location}</li>
+              <li><strong>Available Tickets:</strong> {event.availableTickets}</li>
             </ul>
           </section>
+
+          <section className="bg-white border rounded-xl p-6 shadow-sm">
+            <h3 className="text-lg font-semibold mb-3">Contact Organizer</h3>
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="font-semibold">
+                  {event.organizer?.name || "Event Organizer"}
+                </p>
+                <p className="text-sm text-gray-500">
+                  Have questions about this event?
+                </p>
+              </div>
+              <button
+                onClick={() => navigate(`/events/${event._id}/contact`)}
+                className="px-6 py-3 border border-[#E31B23] text-[#E31B23] rounded-lg font-semibold hover:bg-red-50"
+              >
+                Contact Organizer
+              </button>
+            </div>
+          </section>
         </div>
 
-        {/* -------- RIGHT TICKET CARD -------- */}
-        <div className="border rounded-lg p-5 h-fit shadow-sm">
-          <h3 className="text-lg font-semibold mb-3">
-            Ticket Price
-          </h3>
+        {/* RIGHT */}
+        <div>
+          <div className="bg-white border rounded-xl p-6 shadow-lg">
+            <h3 className="text-lg font-semibold">Ticket Summary</h3>
 
-          <p className="text-2xl font-bold text-[#E31B23]">
-            ₹{event.ticketPrice}
-          </p>
-
-          <button
-            onClick={handleBookNow}
-            aria-disabled={event.availableTickets === 0}
-            disabled={event.availableTickets === 0}
-            className={`w-full mt-4 py-3 rounded-md font-semibold transition ${
-              event.availableTickets === 0
-                ? "bg-gray-300 cursor-not-allowed"
-                : "bg-[#E31B23] text-white hover:bg-red-600"
-            }`}
-          >
-            {event.availableTickets === 0
-              ? "Sold Out"
-              : "Book Now"}
-          </button>
-
-          {!user && (
-            <p className="text-xs text-gray-500 mt-2">
-              Login required to book tickets
+            <p className="text-3xl font-bold text-[#E31B23] mt-2">
+              ₹{finalPrice}
             </p>
-          )}
+
+            <div className="mt-4">
+              <label className="text-sm font-semibold">Tickets</label>
+              <div className="flex items-center gap-4 mt-2">
+                <button onClick={() => setTickets(Math.max(1, tickets - 1))} className="px-3 py-1 border rounded">−</button>
+                <span className="font-bold">{tickets}</span>
+                <button onClick={() => setTickets(Math.min(event.availableTickets, tickets + 1))} className="px-3 py-1 border rounded">+</button>
+              </div>
+            </div>
+
+            <div
+              onClick={() => setIsVip(!isVip)}
+              className={`mt-5 p-4 rounded-xl border-2 cursor-pointer ${
+                isVip ? "border-yellow-400 bg-yellow-50" : "border-gray-200"
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <Crown className="text-yellow-500" />
+                <div>
+                  <p className="font-semibold">VIP Ticket</p>
+                  <p className="text-sm text-gray-500">
+                    Premium seating (+₹500 per ticket)
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={handleBookNow}
+              className="w-full mt-6 py-3 rounded-lg bg-[#E31B23] text-white font-semibold hover:bg-red-600"
+            >
+              Book Now
+            </button>
+          </div>
         </div>
+
       </div>
     </>
   );

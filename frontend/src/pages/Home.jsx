@@ -1,42 +1,67 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import HeroSlider from "../components/HeroSlider";
 import CategoryChips from "../components/CategoryChips";
 import EventCard from "../components/EventCard";
 import api from "../api/axios";
+import { ChevronDown } from "lucide-react";
 
 export default function Home() {
   const [events, setEvents] = useState([]);
   const [activeCategory, setActiveCategory] = useState("All");
+  const [sortBy, setSortBy] = useState("soonest");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get("/events")
+    api
+      .get("/events")
       .then((res) => setEvents(res.data))
       .catch((err) => console.error(err))
       .finally(() => setLoading(false));
   }, []);
 
-  const filteredEvents =
-    activeCategory === "All"
-      ? events
-      : events.filter(
-          (event) => event.category === activeCategory
-        );
+  /* ---------------- Filter + Sort ---------------- */
+  const filteredEvents = useMemo(() => {
+    let data =
+      activeCategory === "All"
+        ? [...events]
+        : events.filter((event) => event.category === activeCategory);
+
+    if (sortBy === "soonest") data.sort((a, b) => new Date(a.date) - new Date(b.date));
+    if (sortBy === "priceLow") data.sort((a, b) => a.ticketPrice - b.ticketPrice);
+    if (sortBy === "priceHigh") data.sort((a, b) => b.ticketPrice - a.ticketPrice);
+
+    return data;
+  }, [events, activeCategory, sortBy]);
 
   return (
     <>
       <HeroSlider />
 
-      <CategoryChips
-        active={activeCategory}
-        setActive={setActiveCategory}
-      />
+      {/* ---------------- Category + Sort ---------------- */}
+      <div className="max-w-[1240px] mx-auto px-4 mt-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <CategoryChips active={activeCategory} setActive={setActiveCategory} />
+
+        {/* Sort Dropdown */}
+        <div className="relative w-48">
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="w-full appearance-none rounded-md border px-4 py-2 text-sm bg-white shadow-sm focus:ring-2 focus:ring-red-500 outline-none cursor-pointer"
+          >
+            <option value="soonest">Soonest First</option>
+            <option value="priceLow">Price: Low → High</option>
+            <option value="priceHigh">Price: High → Low</option>
+          </select>
+          <ChevronDown
+            size={18}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+          />
+        </div>
+      </div>
 
       <div className="max-w-[1240px] mx-auto px-4 mt-8">
         <h2 className="text-xl font-semibold mb-4">
-          {activeCategory === "All"
-            ? "Recommended Events"
-            : `${activeCategory} Events`}
+          {activeCategory === "All" ? "Recommended Events" : `${activeCategory} Events`}
         </h2>
 
         {loading ? (

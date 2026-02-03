@@ -1,13 +1,11 @@
-import { useSelector } from "react-redux";
 import { Navigate } from "react-router-dom";
 
 export default function OrganizerRoute({ children }) {
-  const { user } = useSelector((state) => state.auth);
+  const user = JSON.parse(localStorage.getItem("user"));
 
-  if (!user) return <Navigate to="/login" />;
-
-  if (user.role !== "organizer")
-    return <Navigate to="/" />;
+  if (!user || user.role !== "organizer") {
+    return <Navigate to="/login" />;
+  }
 
   return children;
 }

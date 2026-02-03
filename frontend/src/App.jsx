@@ -13,11 +13,15 @@ import LoginForm from "./pages/LoginForm";
 import PaymentPage from "./pages/PaymentPage";
 import RegisterForm from "./pages/RegisterForm";
 import Event from "./pages/Event";
+import ContactOrganizer from "./pages/ContactOrganizer";
 
 /* Organizer */
 import OrganizerDashboard from "./pages/organizer/OrganizerDashboard";
 import CreateEvent from "./pages/organizer/CreateEvent";
 import EditEvent from "./pages/organizer/EditEvent";
+import OrganizerLayout from "./pages/organizer/OrganizerLayout";
+import OrganizerEvents from "./pages/organizer/OrganizerEvents";
+import OrganizerRevenue from "./pages/organizer/OrganizerRevenue";
 
 /* Admin */
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -28,13 +32,15 @@ import ProtectedRoute from "./routes/ProtectedRoute";
 
 function Layout({ children }) {
   const location = useLocation();
-  const isAdminRoute = location.pathname.startsWith("/admin");
+  const isDashboardRoute =
+    location.pathname.startsWith("/admin") ||
+    location.pathname.startsWith("/organizer");
 
   return (
     <>
-      {!isAdminRoute && <Navbar />}
+      {!isDashboardRoute && <Navbar />}
       {children}
-      {!isAdminRoute && <Footer />}
+      {!isDashboardRoute && <Footer />}
     </>
   );
 }
@@ -49,10 +55,11 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/events" element={<Event />} />
           <Route path="/events/:id" element={<EventDetails />} />
+          <Route path="/events/:id/contact" element={<ContactOrganizer />} />
           <Route path="/login" element={<LoginForm />} />
           <Route path="/register" element={<RegisterForm />} />
 
-          {/* ---------- Authenticated Users ---------- */}
+          {/* ---------- Authenticated ---------- */}
           <Route element={<ProtectedRoute allowedRoles={["user", "organizer", "admin"]} />}>
             <Route path="/book/:id" element={<BookingPage />} />
             <Route path="/payment/:bookingId" element={<PaymentPage />} />
@@ -61,9 +68,13 @@ export default function App() {
 
           {/* ---------- Organizer ---------- */}
           <Route element={<ProtectedRoute allowedRoles={["organizer"]} />}>
-            <Route path="/organizer/dashboard" element={<OrganizerDashboard />} />
-            <Route path="/organizer/create-event" element={<CreateEvent />} />
-            <Route path="/organizer/edit-event/:id" element={<EditEvent />} />
+            <Route element={<OrganizerLayout />}>
+              <Route path="/organizer/dashboard" element={<OrganizerDashboard />} />
+              <Route path="/organizer/events" element={<OrganizerEvents />} />
+              <Route path="/organizer/revenue" element={<OrganizerRevenue />} />
+              <Route path="/organizer/create-event" element={<CreateEvent />} />
+              <Route path="/organizer/edit-event/:id" element={<EditEvent />} />
+            </Route>
           </Route>
 
           {/* ---------- Admin ---------- */}

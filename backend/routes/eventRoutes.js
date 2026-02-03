@@ -9,18 +9,45 @@ import {
   getApprovedEvents,
   getPendingEvents,
   getSingleEvent,
+  getOrganizerDashboard,
+  contactOrganizer
 } from "../controllers/eventController.js";
 
 import { protect, authorizeRoles } from "../middleware/authMiddleware.js";
-import upload from "../middleware/upload.js";
 
 const router = express.Router();
 
 // PUBLIC
 router.get("/", getApprovedEvents);
+router.post("/:id/contact", contactOrganizer);
+
 
 // ORGANIZER
 router.get("/my-events", protect, authorizeRoles("organizer"), getMyEvents);
+router.post(
+  "/",
+  protect,
+  authorizeRoles("organizer"),
+  createEvent
+);
+router.put(
+  "/:id",
+  protect,
+  authorizeRoles("organizer"),
+  updateEvent
+);
+router.delete(
+  "/:id",
+  protect,
+  authorizeRoles("organizer"),
+  deleteEvent
+);
+router.get(
+  "/organizer/dashboard",
+  protect,
+  authorizeRoles("organizer"),
+  getOrganizerDashboard
+);
 
 // ADMIN
 router.get("/pending", protect, authorizeRoles("admin"), getPendingEvents);
@@ -29,11 +56,6 @@ router.put("/reject/:id", protect, authorizeRoles("admin"), rejectEvent);
 
 // SINGLE EVENT (LAST!)
 router.get("/:id", getSingleEvent);
-
-// CRUD
-router.post("/", protect, authorizeRoles("organizer"), upload.single("image"), createEvent);
-router.put("/:id", protect, authorizeRoles("organizer"), upload.single("image"), updateEvent);
-router.delete("/:id", protect, authorizeRoles("organizer"), deleteEvent);
 
 
 export default router;

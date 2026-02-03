@@ -36,19 +36,6 @@ export default function OrganizerDashboard() {
 
   return (
     <div className="flex min-h-screen bg-gray-100">
-      {/* SIDEBAR */}
-      <aside className="w-64 bg-white shadow-lg p-6 hidden md:block">
-        <h2 className="text-2xl font-bold text-red-600 mb-10">
-          Organizer panel
-        </h2>
-
-        <nav className="space-y-4">
-          <SidebarItem icon={<LayoutDashboard />} label="Dashboard" active />
-          <SidebarItem icon={<Calendar />} label="My Events" />
-          <SidebarItem icon={<IndianRupee />} label="Revenue" />
-        </nav>
-      </aside>
-
       {/* MAIN CONTENT */}
       <main className="flex-1 p-8">
         {/* HEADER */}

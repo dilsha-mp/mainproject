@@ -16,20 +16,32 @@ export default function CreateEvent() {
     image: "",
   });
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+const handleChange = (e) => {
+  const { name, value, type } = e.target;
 
-  const submitHandler = async (e) => {
-    e.preventDefault();
-    try {
-      await api.post("/events", form);
-      alert("🎉 Event submitted for admin approval");
-      navigate("/organizer/dashboard");
-    } catch (err) {
-      alert(err.response?.data?.message || "Error creating event");
-    }
-  };
+  setForm({
+    ...form,
+    [name]: type === "number" ? Number(value) : value,
+  });
+};
+
+const submitHandler = async (e) => {
+  e.preventDefault();
+
+  if (form.totalTickets <= 0 || form.ticketPrice < 0) {
+    alert("Ticket values must be valid");
+    return;
+  }
+
+  try {
+    await api.post("/events", form);
+    alert("🎉 Event submitted for admin approval");
+    navigate("/organizer/dashboard");
+  } catch (err) {
+    console.error(err);
+    alert(err.response?.data?.message || "Error creating event");
+  }
+};
 
   return (
     <div className="min-h-screen bg-gray-100 py-10 px-4">
