@@ -199,7 +199,7 @@ export const getSingleEvent = async (req, res) => {
   const event = await Event.findOne({
     _id: req.params.id,
     isApproved: true,
-  });
+  }).populate("organizer", "name email phone");
 
   if (!event) {
     return res.status(404).json({ message: "Event not found" });
@@ -213,11 +213,23 @@ export const contactOrganizer = async (req, res) => {
     const { id } = req.params;
     const { name, email, subject, message } = req.body;
 
-    if (!name || !email || !subject || !message) {
-      return res.status(400).json({ message: "All fields are required" });
+    const event = await Event.findById(id).populate("organizer", "email");
+
+    if (!event) {
+      return res.status(404).json({ message: "Event not found" });
     }
-     res.status(200).json({ message: "Message sent successfully" });
+
+    console.log("CONTACT MESSAGE:", {
+      to: event.organizer.email,
+      from: email,
+      name,
+      subject,
+      message,
+    });
+
+    res.status(200).json({ message: "Message sent successfully" });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: "Failed to send message" });
   }
 };

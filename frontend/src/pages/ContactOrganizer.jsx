@@ -160,12 +160,14 @@ export default function ContactOrganizer() {
                           Your Name
                         </label>
                         <input
+                         name="name"
                           required
                           value={form.name}
                           onChange={(e) =>
                             setForm({ ...form, name: e.target.value })
                           }
                           className="w-full px-4 py-3 rounded-xl border"
+                            placeholder="Type your full name here"
                         />
                       </div>
 
@@ -181,6 +183,7 @@ export default function ContactOrganizer() {
                             setForm({ ...form, email: e.target.value })
                           }
                           className="w-full px-4 py-3 rounded-xl border"
+                           placeholder="example@email.com"
                         />
                       </div>
                     </div>
@@ -196,6 +199,7 @@ export default function ContactOrganizer() {
                           setForm({ ...form, subject: e.target.value })
                         }
                         className="w-full px-4 py-3 rounded-xl border"
+                         placeholder="E.g., Issue with booking #1234"
                       />
                     </div>
 
@@ -211,6 +215,7 @@ export default function ContactOrganizer() {
                           setForm({ ...form, message: e.target.value })
                         }
                         className="w-full px-4 py-3 rounded-xl border resize-none"
+                        placeholder="Please describe your issue in detail so we can assist you better..."
                       />
                     </div>
 

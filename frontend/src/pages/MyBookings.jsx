@@ -85,35 +85,112 @@ export default function MyBookings() {
   return (
     <div className="min-h-screen bg-gray-50 pb-16">
       {/* ---------------- PDF TEMPLATE ---------------- */}
-      {printTicket && (
+{printTicket && (
+  <div
+    id="ticket-pdf-template"
+    style={{
+      backgroundColor: "#ffffff",
+      width: "800px",
+      fontFamily: "Arial, sans-serif",
+    }}
+    className="fixed -top-[9999px] left-0 border rounded-xl overflow-hidden"
+  >
+    {/* TOP BRAND STRIP */}
+    <div
+      style={{
+        background: "#dc2626",
+        color: "white",
+        padding: "14px 24px",
+        fontSize: "20px",
+        fontWeight: "bold",
+        letterSpacing: "1px",
+      }}
+    >
+      EventEase — Event Ticket
+    </div>
+
+    <div className="flex">
+      {/* LEFT MAIN DETAILS */}
+      <div
+        style={{ padding: "24px", flex: 1 }}
+      >
+        <h2 style={{ fontSize: "26px", fontWeight: "bold" }}>
+          {printTicket.event.title}
+        </h2>
+
         <div
-          id="ticket-pdf-template"
-          className="fixed -top-[9999px] left-0 w-[800px] bg-white border flex"
+          style={{
+            marginTop: "18px",
+            fontSize: "14px",
+            color: "#374151",
+            lineHeight: "1.8",
+          }}
         >
-          <div className="flex-1 p-6 border-r border-dashed">
-            <h1 className="text-2xl font-black text-red-600">EventEase</h1>
-            <h2 className="text-3xl font-bold mt-4">
-              {printTicket.event.title}
-            </h2>
-
-            <div className="mt-6 space-y-2 text-sm">
-              <p>📅 {new Date(printTicket.event.date).toLocaleDateString("en-IN")}</p>
-              <p>📍 {printTicket.event.location}</p>
-              <p>🎟 Tickets: {printTicket.tickets}</p>
-              <p className="text-xs text-gray-500">
-                Booking ID: {printTicket._id}
-              </p>
-            </div>
-          </div>
-
-          <div className="w-64 flex flex-col items-center justify-center bg-gray-50">
-            <QRCode value={printTicket._id} size={140} />
-            <p className="mt-4 font-bold text-xl">
-              ₹{printTicket.totalAmount}
-            </p>
-          </div>
+          <p><strong>Date:</strong> {new Date(printTicket.event.date).toLocaleDateString("en-IN")}</p>
+          <p><strong>Venue:</strong> {printTicket.event.location}</p>
+          <p><strong>Tickets:</strong> {printTicket.tickets}</p>
+          <p><strong>Booking ID:</strong> {printTicket._id}</p>
         </div>
-      )}
+
+        {/* Divider */}
+        <div
+          style={{
+            borderTop: "1px dashed #d1d5db",
+            margin: "20px 0",
+          }}
+        />
+
+        {/* Instruction */}
+        <p
+          style={{
+            fontSize: "13px",
+            color: "#6b7280",
+          }}
+        >
+          Please present this QR code at the entrance for verification.
+        </p>
+      </div>
+
+      {/* RIGHT QR PANEL */}
+      <div
+        style={{
+          width: "260px",
+          backgroundColor: "#f3f4f6",
+          borderLeft: "1px dashed #d1d5db",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          padding: "20px",
+        }}
+      >
+        <QRCode value={printTicket._id} size={150} />
+
+        <div style={{ marginTop: "18px", textAlign: "center" }}>
+          <p style={{ fontSize: "12px", color: "#6b7280" }}>
+            Amount Paid
+          </p>
+          <p style={{ fontSize: "28px", fontWeight: "bold" }}>
+            ₹{printTicket.totalAmount}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    {/* FOOTER */}
+    <div
+      style={{
+        background: "#f9fafb",
+        padding: "10px",
+        textAlign: "center",
+        fontSize: "11px",
+        color: "#6b7280",
+      }}
+    >
+      This ticket is valid only for the specified event. Unauthorized duplication is prohibited.
+    </div>
+  </div>
+)}
 
       {/* ---------------- HEADER ---------------- */}
       <div className="bg-white sticky top-0 z-10 border-b">

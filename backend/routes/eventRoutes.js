@@ -19,7 +19,7 @@ const router = express.Router();
 
 // PUBLIC
 router.get("/", getApprovedEvents);
-router.post("/:id/contact", contactOrganizer);
+router.post("/:id/contact-organizer", contactOrganizer);
 
 
 // ORGANIZER
@@ -54,7 +54,7 @@ router.get("/pending", protect, authorizeRoles("admin"), getPendingEvents);
 router.put("/approve/:id", protect, authorizeRoles("admin"), approveEvent);
 router.put("/reject/:id", protect, authorizeRoles("admin"), rejectEvent);
 
-// SINGLE EVENT (LAST!)
+// SINGLE EVENT
 router.get("/:id", getSingleEvent);
 
 
