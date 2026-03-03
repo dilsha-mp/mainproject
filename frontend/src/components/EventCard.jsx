@@ -6,6 +6,8 @@ export default function EventCard({ event }) {
   const navigate = useNavigate();
   const { user } = useSelector((state) => state.auth);
 
+    if (!event) return null; // safety check
+
   const eventDate = new Date(event.date);
   const isExpired = eventDate < new Date();
 

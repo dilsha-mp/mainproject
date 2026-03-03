@@ -75,3 +75,67 @@ export const getMyBookings = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+export const verifyTicket = async (req, res) => {
+  try {
+    const { ticketId } = req.params;
+    console.log("Verifying ticket:", ticketId);
+    console.log("User making request:", req.user._id, req.user.role);
+
+    const booking = await Booking.findById(ticketId)
+      .populate("user", "name")
+      .populate("event", "title organizer");
+
+    if (!booking) {
+      console.log("Booking not found");
+      return res.status(404).json({ message: "Invalid Ticket" });
+    }
+
+    console.log("Booking found:", {
+      id: booking._id,
+      paymentStatus: booking.paymentStatus,
+      isCheckedIn: booking.isCheckedIn,
+      eventOrganizer: booking.event.organizer,
+      userId: req.user._id
+    });
+
+    if (booking.paymentStatus !== "paid") {
+      console.log("Payment not completed");
+      return res.status(400).json({ message: "Ticket not paid" });
+    }
+
+    // ✅ Prevent duplicate check-in
+    if (booking.isCheckedIn) {
+      console.log("Ticket already used");
+      return res.status(400).json({ message: "Ticket already used" });
+    }
+
+    if (
+      booking.event.organizer &&
+      booking.event.organizer.toString() !== req.user._id.toString()
+    ) {
+      console.log("Unauthorized scanner - organizer mismatch");
+      return res.status(403).json({ message: "Unauthorized scanner" });
+    }
+
+    console.log("Ticket verification successful");
+
+    // ✅ Mark attendance
+    booking.isCheckedIn = true;
+    booking.checkedInAt = new Date();
+
+    await booking.save();
+
+    res.json({
+      booking: {
+        guestName: booking.user.name,
+        eventName: booking.event.title,
+        quantity: booking.tickets,
+        isVip: booking.ticketType === "VIP"
+      }
+    });
+
+  } catch (error) {
+       console.log("Error in verifyTicket:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};

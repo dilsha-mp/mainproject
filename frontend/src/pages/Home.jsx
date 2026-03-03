@@ -11,22 +11,30 @@ export default function Home() {
   const [sortBy, setSortBy] = useState("soonest");
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    api
-      .get("/events")
-      .then((res) => setEvents(res.data))
-      .catch((err) => console.error(err))
-      .finally(() => setLoading(false));
-  }, []);
+useEffect(() => {
+  const fetchEvents = async () => {
+    try {
+      const res = await api.get("/events");
+      setEvents(res.data || []);
+    } catch (err) {
+      console.error("Error fetching events:", err.response?.data || err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchEvents();
+}, []);
 
   /* ---------------- Filter + Sort ---------------- */
   const filteredEvents = useMemo(() => {
     let data =
       activeCategory === "All"
         ? [...events]
-        : events.filter((event) => event.category === activeCategory);
+        : events.filter((event) => event?.category === activeCategory);
 
-    if (sortBy === "soonest") data.sort((a, b) => new Date(a.date) - new Date(b.date));
+    if (sortBy === "soonest")
+      data.sort((a, b) => new Date(a.date) - new Date(b.date));
     if (sortBy === "priceLow") data.sort((a, b) => a.ticketPrice - b.ticketPrice);
     if (sortBy === "priceHigh") data.sort((a, b) => b.ticketPrice - a.ticketPrice);
 
@@ -59,6 +67,7 @@ export default function Home() {
         </div>
       </div>
 
+      {/* ---------------- Event List ---------------- */}
       <div className="max-w-[1240px] mx-auto px-4 mt-8">
         <h2 className="text-xl font-semibold mb-4">
           {activeCategory === "All" ? "Recommended Events" : `${activeCategory} Events`}
@@ -66,12 +75,12 @@ export default function Home() {
 
         {loading ? (
           <p className="text-gray-500">Loading events...</p>
-        ) : filteredEvents.length === 0 ? (
+        ) : filteredEvents?.length === 0 ? (
           <p className="text-gray-500">No events available.</p>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {filteredEvents.map((event) => (
-              <EventCard key={event._id} event={event} />
+              <EventCard key={event?._id} event={event} />
             ))}
           </div>
         )}

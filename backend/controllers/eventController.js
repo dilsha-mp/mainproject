@@ -1,4 +1,5 @@
 import Event from "../models/Event.js";
+import Booking from "../models/Booking.js";
 
 /* ======================================================
    ORGANIZER → CREATE EVENT
@@ -53,7 +54,8 @@ export const createEvent = async (req, res) => {
       req.file?.path ||
       req.file?.secure_url ||
       req.body.image ||
-      req.body.imageUrl;
+      req.body.imageUrl ||
+      "https://via.placeholder.com/400x200?text=Event+Image";
 
     if (!imageUrl) {
       return res.status(400).json({ message: "Event image is required" });
@@ -85,10 +87,36 @@ export const createEvent = async (req, res) => {
    ORGANIZER → GET MY EVENTS
 ====================================================== */
 export const getMyEvents = async (req, res) => {
-  const events = await Event.find({ organizer: req.user._id }).sort({
-    createdAt: -1,
-  });
-  res.json(events);
+  try {
+    const events = await Event.find({ organizer: req.user._id }).sort({
+      createdAt: -1,
+    });
+
+    const eventsWithStats = await Promise.all(
+      events.map(async (event) => {
+        const bookings = await Booking.find({
+          event: event._id,
+          paymentStatus: "paid",
+        });
+
+        const soldTickets = bookings.reduce(
+          (sum, b) => sum + b.tickets,
+          0
+        );
+        const revenue = soldTickets * event.ticketPrice;
+
+        return {
+          ...event.toObject(),
+          soldTickets,
+          revenue,
+        };
+      })
+    );
+
+    res.json(eventsWithStats);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
 /* ======================================================
@@ -172,24 +200,26 @@ export const rejectEvent = async (req, res) => {
   res.json({ message: "Event rejected", event });
 };
 
+//---------------------get all-------------
+export const getAllEvents = async (req, res) => {
+  try {
+    const events = await Event.find(); // fetch events from DB
+    res.json(events);                  // must return JSON
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 /* ======================================================
    USER → GET APPROVED EVENTS
 ====================================================== */
-export const getApprovedEvents = async (req, res) => {
-  try {
-    const filter = { isApproved: true };
-
-    if (req.query.category) {
-      filter.category = req.query.category;
-    }
-
-    const events = await Event.find(filter)
-      .populate("organizer", "name")
-      .sort({ date: 1 });
-
+export const getApprovedEvents = async (req, res, next) => {
+   try {
+    const events = await Event.find();
     res.json(events);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+  } catch (err) {
+    console.error("Error fetching events:", err);
+    next(err); // sends to global error handler
   }
 };
 /* ======================================================
@@ -277,6 +307,37 @@ export const getOrganizerDashboard = async (req, res) => {
       },
       events,
     });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+export const getOrganizerEvents = async (req, res) => {
+  try {
+    const events = await Event.find({ organizer: req.user._id });
+
+    const eventsWithStats = await Promise.all(
+      events.map(async (event) => {
+ const bookings = await Booking.find({
+          event: event._id,
+          paymentStatus: "paid",
+        });
+
+        const soldTickets = bookings.reduce(
+          (sum, b) => sum + b.tickets,
+          0
+        );
+         const revenue = soldTickets * event.ticketPrice;
+
+        return {
+          ...event.toObject(),
+          soldTickets,
+          revenue,
+        };
+      })
+    );
+
+    res.json(eventsWithStats);
+
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

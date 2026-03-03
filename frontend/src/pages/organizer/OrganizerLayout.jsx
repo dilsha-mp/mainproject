@@ -2,7 +2,7 @@ import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   Calendar,
-  IndianRupee,
+  QrCode,
   LogOut,
 } from "lucide-react";
 
@@ -23,9 +23,23 @@ export default function OrganizerLayout() {
         </h2>
 
         <nav className="space-y-3">
-          <SidebarLink to="/organizer/dashboard" icon={<LayoutDashboard />} label="Dashboard" />
-          <SidebarLink to="/organizer/events" icon={<Calendar />} label="My Events" />
-          <SidebarLink to="/organizer/revenue" icon={<IndianRupee />} label="Revenue" />
+          <SidebarLink
+            to="/organizer/dashboard"
+            icon={<LayoutDashboard />}
+            label="Dashboard"
+          />
+
+          <SidebarLink
+            to="/organizer/events"
+            icon={<Calendar />}
+            label="My Events"
+          />
+
+          <SidebarLink
+            to="/organizer/qr-scan"
+            icon={<QrCode />}
+            label="QR Scan"
+          />
 
           <button
             onClick={logout}

@@ -14,6 +14,17 @@ const bookingSchema = new mongoose.Schema({
 
   razorpayOrderId: String,
   razorpayPaymentId: String,
+   isCheckedIn: {
+    type: Boolean,
+    default: false,
+  },
+
+  checkedInAt: Date,
+
+  ticketType: {
+    type: String,
+    default: "Regular"
+  }
 }, { timestamps: true });
 
 

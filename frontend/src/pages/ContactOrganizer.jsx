@@ -26,6 +26,7 @@ export default function ContactOrganizer() {
     subject: "",
     message: ""
   });
+  const [errorMessage, setErrorMessage] = useState("");
 
   /* FETCH EVENT */
   useEffect(() => {
@@ -38,13 +39,30 @@ export default function ContactOrganizer() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setStatus("sending");
+    setErrorMessage("");
 
     try {
-      await api.post(`/events/${id}/contact`, form);
+      const response = await api.post(`/events/${id}/contact-organizer`, form);
+      console.log("Contact response:", response.data);
       setStatus("success");
       setForm({ name: "", email: "", subject: "", message: "" });
-    } catch {
+      
+      // Auto-reset success message after 5 seconds
+      setTimeout(() => {
+        setStatus("idle");
+      }, 5000);
+    } catch (error) {
+      console.error("Contact form error:", error);
       setStatus("error");
+      
+      // Set specific error message
+      if (error.response?.data?.message) {
+        setErrorMessage(error.response.data.message);
+      } else if (error.code === "NETWORK_ERROR") {
+        setErrorMessage("Network error. Please check your connection.");
+      } else {
+        setErrorMessage("Failed to send message. Please try again.");
+      }
     }
   };
 
@@ -237,9 +255,21 @@ export default function ContactOrganizer() {
                     </button>
 
                     {status === "error" && (
-                      <p className="text-center text-red-600 text-sm">
-                        Something went wrong. Please try again.
-                      </p>
+                      <div className="text-center">
+                        <p className="text-red-600 text-sm">
+                          {errorMessage || "Something went wrong. Please try again."}
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setStatus("idle");
+                            setErrorMessage("");
+                          }}
+                          className="mt-2 text-red-600 text-sm underline hover:text-red-700"
+                        >
+                          Clear Error
+                        </button>
+                      </div>
                     )}
                   </form>
                 </>

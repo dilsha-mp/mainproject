@@ -6,6 +6,7 @@ import {
   deleteEvent,
   approveEvent,
   rejectEvent,
+    getAllEvents,
   getApprovedEvents,
   getPendingEvents,
   getSingleEvent,
@@ -18,6 +19,7 @@ import { protect, authorizeRoles } from "../middleware/authMiddleware.js";
 const router = express.Router();
 
 // PUBLIC
+router.get("/all", getAllEvents);
 router.get("/", getApprovedEvents);
 router.post("/:id/contact-organizer", contactOrganizer);
 

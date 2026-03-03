@@ -3,6 +3,7 @@ import {
   createBooking,
   confirmPayment,
   getMyBookings,
+  verifyTicket,
 } from "../controllers/bookingController.js";
 
 import { protect, authorizeRoles } from "../middleware/authMiddleware.js";
@@ -17,5 +18,6 @@ router.post("/payment", protect, authorizeRoles("user"), confirmPayment);
 
 // User booking history
 router.get("/my", protect, authorizeRoles("user"), getMyBookings);
+router.get("/verify/:ticketId", protect, verifyTicket);
 
 export default router;

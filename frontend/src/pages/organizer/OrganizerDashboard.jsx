@@ -19,18 +19,28 @@ export default function OrganizerDashboard() {
   }, []);
 
   const fetchEvents = async () => {
-    const res = await api.get("/events/my-events");
-    setEvents(res.data);
+    try {
+      const res = await api.get("/events/my-events");
+      setEvents(res.data || []);
+    } catch (error) {
+      console.error("Error fetching events:", error);
+      setEvents([]);
+    }
   };
 
   const deleteEvent = async (id) => {
     if (!window.confirm("Delete this event?")) return;
-    await api.delete(`/events/${id}`);
-    fetchEvents();
+    try {
+      await api.delete(`/events/${id}`);
+      fetchEvents();
+    } catch (error) {
+      console.error("Error deleting event:", error);
+      alert("Failed to delete event");
+    }
   };
 
   const totalRevenue = events.reduce(
-    (sum, e) => sum + e.ticketPrice * (e.soldTickets || 0),
+    (sum, e) => sum + (e.revenue || 0),
     0
   );
 

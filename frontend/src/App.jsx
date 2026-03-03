@@ -21,11 +21,16 @@ import CreateEvent from "./pages/organizer/CreateEvent";
 import EditEvent from "./pages/organizer/EditEvent";
 import OrganizerLayout from "./pages/organizer/OrganizerLayout";
 import OrganizerEvents from "./pages/organizer/OrganizerEvents";
-import OrganizerRevenue from "./pages/organizer/OrganizerRevenue";
+import EnhancedScanner from "./pages/organizer/EnhancedScanner";
 
 /* Admin */
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import UserManagement from "./pages/admin/UserManagement";
+import AdminSidebar from "./pages/admin/AdminSidebar";
+import PendingEvents from "./pages/admin/PendingEvents";
+import ApprovedEvents from "./pages/admin/ApprovedEvents";
+import Users from "./pages/admin/Users";
+import Organizers from "./pages/admin/Organizers";
 
 /* Route Guard */
 import ProtectedRoute from "./routes/ProtectedRoute";
@@ -71,8 +76,9 @@ export default function App() {
             <Route element={<OrganizerLayout />}>
               <Route path="/organizer/dashboard" element={<OrganizerDashboard />} />
               <Route path="/organizer/events" element={<OrganizerEvents />} />
-              <Route path="/organizer/revenue" element={<OrganizerRevenue />} />
               <Route path="/organizer/create-event" element={<CreateEvent />} />
+              <Route path="/organizer/qr-scan" element={<EnhancedScanner />} />
+              <Route path="/organizer/qr-scan-enhanced" element={<EnhancedScanner />} />
               <Route path="/organizer/edit-event/:id" element={<EditEvent />} />
             </Route>
           </Route>
@@ -80,7 +86,11 @@ export default function App() {
           {/* ---------- Admin ---------- */}
           <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
-            <Route path="/admin/users" element={<UserManagement />} />
+            <Route path="/admin/sidebar" element={<AdminSidebar />} />
+            <Route path="/admin/pending" element={<PendingEvents />} />
+            <Route path="/admin/approved" element={<ApprovedEvents />} />
+            <Route path="/admin/users" element={<Users />} />
+            <Route path="/admin/organizers" element={<Organizers />} />
           </Route>
 
         </Routes>
