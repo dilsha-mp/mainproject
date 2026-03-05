@@ -137,3 +137,16 @@ Deployed on Vercel
 
 Backend
 Deployed on Render
+
+📸 Key Features
+
+✔ Event creation and approval system
+✔ Secure authentication with JWT
+✔ Razorpay payment integration
+✔ QR-based ticket verification
+✔ Role-based access control
+✔ Responsive modern UI
+
+👩‍💻 Author
+
+Developed by Dilsha Shirin
