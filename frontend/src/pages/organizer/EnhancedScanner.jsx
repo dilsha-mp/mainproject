@@ -99,8 +99,7 @@ export default function EnhancedScanner() {
 
   /* ---------------- HANDLE SCAN ---------------- */
   const handleScan = async (result) => {
-    if (!result || loading || paused) return;
-
+if (!result || loading || paused || isScanning) return;
     console.log("Scan result:", result);
     setIsScanning(true);
     setLastScanTime(Date.now());
