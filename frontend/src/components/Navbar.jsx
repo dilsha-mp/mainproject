@@ -61,7 +61,7 @@ export default function Navbar() {
 
         {/* DESKTOP RIGHT */}
         <div className="hidden md:flex items-center gap-4">
-          {user && (
+          {user?.role === "user" && (
             <Link
               to="/my-bookings"
               className="flex items-center gap-1 text-gray-700 hover:text-[#E31B23]"
@@ -125,7 +125,7 @@ export default function Navbar() {
               />
             )}
 
-            {user && (
+            {user?.role === "user" && (
               <MobileLink
                 to="/my-bookings"
                 label="My Bookings"
